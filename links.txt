@@ -1,0 +1,12 @@
+https://www.kaggle.com/willkoehrsen/start-here-a-gentle-introduction
+
+https://www.kaggle.com/mlisovyi/lightgbm-hyperparameter-optimisation-lb-0-746
+
+# reg logit exp
+http://www.bogotobogo.com/python/scikit-learn/scikit-learn_logistic_regression.php
+
+# display ROC
+https://www.kaggle.com/ogrellier/good-fun-with-ligthgbm/code
+
+
+
