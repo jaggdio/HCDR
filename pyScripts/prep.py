@@ -10,6 +10,7 @@ from functools import reduce
 
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
+from lightgbm import LGBMClassifier
 
 import from_lib
 import pandas as pd
