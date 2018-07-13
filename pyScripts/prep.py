@@ -11,13 +11,16 @@ from functools import reduce
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 from lightgbm import LGBMClassifier
+
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.model_selection import KFold, StratifiedKFold
+
 
 import from_lib
 import pandas as pd
 import numpy as np
 import gc
+import pdb
 pd.set_option('display.max_columns', None)
 
 import warnings
@@ -317,7 +320,7 @@ def kfold_lightgbm(df, num_folds, stratified = False, debug= False):
 if __name__ == '__main__':
     
     num_rows = None
-        
+
     bureau_balance = import_data('../input/bureau_balance.csv')
     bureau = import_data('../input/bureau.csv')
     
