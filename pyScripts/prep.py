@@ -368,7 +368,7 @@ if __name__ == '__main__':
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
     
-    kfold_lightgbm(df)
+    kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
     
 #==============================================================================
 #     train_df = df[df['TARGET'].notnull()]
