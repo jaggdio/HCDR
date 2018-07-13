@@ -177,7 +177,7 @@ def bureau_features(bureau, bb_aggrigations):
         bb_summarize]
     bureau_features  = reduce(lambda left,right: pd.merge(left, right, on='SK_ID_CURR'), dfs)
     #bureau_features.fillna(0, inplace=True)
-    bureau_features = bureau_features.set_index('SK_ID_CURR')
+    #bureau_features = bureau_features.set_index('SK_ID_CURR')
      
     return bureau_features
 
@@ -248,7 +248,8 @@ if __name__ == '__main__':
     
     bureau_balance = import_data('../input/bureau_balance.csv')
     bureau = import_data('../input/bureau.csv')
-        
+    
+    print('## bureau_balance_features ##')    
     bureau_balance_features1 = burea_balance_feature(bureau_balance)
     bureau = bureau.join(bureau_balance_features1, how='left', on='SK_ID_BUREAU')
     
@@ -261,13 +262,22 @@ if __name__ == '__main__':
     del bureau, bureau_balance
     gc.collect()
     
-
+    print('## application_train_test ##')    
     df = from_lib.application_train_test(num_rows)
+
+    print('## previous_applications ##')    
     prev = from_lib.previous_applications(num_rows)
+
+    print('## pos_cash ##')    
     pos = from_lib.pos_cash(num_rows)
+
+    print('## installments_payments ##')    
     ins = from_lib.installments_payments(num_rows)
+
+    print('## credit_card_balance ##')    
     cc = from_lib.credit_card_balance(num_rows)
     
+    print('## Joining All ##')    
     df = df.join(bureau_features1, how='left', rsuffix="_bureau", on = 'SK_ID_CURR')
     del bureau_features1; gc.collect()
     
@@ -319,6 +329,8 @@ if __name__ == '__main__':
    
     y_train = train_df.TARGET.values
     X_train = train_df.drop('TARGET', axis=1)
+
+    print(' ## Training ##')
     opt.fit(X_train, y_train, callback=status_print)
 
 
