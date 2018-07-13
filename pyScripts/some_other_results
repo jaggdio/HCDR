@@ -34,5 +34,10 @@ https://www.kaggle.com/abhinav97dutt/lightgbm-parameter-bayesian-optimization
 
 valid_0's auc: 0.786112
 
+Unknown parameter: gamma
+[LightGBM] [Warning] Unknown parameter: colsample_bylevel
+[LightGBM] [Warning] Accuracy may be bad since you didn't set num_leaves and 2^max_depth > num_leaves
+
+
 
 
