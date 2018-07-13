@@ -15,6 +15,7 @@ import from_lib
 import pandas as pd
 import numpy as np
 import gc
+import pdb
 pd.set_option('display.max_columns', None)
 
 import warnings
@@ -244,8 +245,7 @@ def BayesSearchCV_optimisation(data):
 if __name__ == '__main__':
     
     num_rows = None
-    
-    
+  
     bureau_balance = import_data('../input/bureau_balance.csv')
     bureau = import_data('../input/bureau.csv')
     
