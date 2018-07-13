@@ -137,7 +137,7 @@ del data['SK_ID_CURR']
 del test['SK_ID_CURR']
 
 #Create train and validation set
-train_x, valid_x, train_y, valid_y = train_test_split(data, y, test_size=0.2, shuffle=True)
+train_x, valid_x, train_y, valid_y = train_test_split(data, y, test_size=0.2)
 
 #------------------------Build LightGBM Model-----------------------
 train_data=lgb.Dataset(train_x,label=train_y)
