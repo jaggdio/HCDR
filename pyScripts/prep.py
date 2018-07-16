@@ -19,6 +19,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 import from_lib
 import pandas as pd
 import numpy as np
+import cPickle as pickle
 import gc
 import pdb
 pd.set_option('display.max_columns', None)
@@ -368,6 +369,9 @@ if __name__ == '__main__':
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
     
+    with open('../output/features.pkl', 'wb') as fp:
+      pickle.dump(df, fp)
+
     kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
     
 #==============================================================================
