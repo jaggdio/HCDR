@@ -369,8 +369,8 @@ if __name__ == '__main__':
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
     
-    with open('../output/features.pkl', 'wb') as fp:
-      pickle.dump(df, fp)
+   # with open('../output/features.pkl', 'wb') as fp:
+   #   pickle.dump(df, fp)
 
     kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
     

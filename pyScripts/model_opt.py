@@ -42,12 +42,12 @@ def status_print(optim_result):
 
 if __name__ == '__main__':
 
-	with open('../output/features.pkl', 'rb') as fp:
-       df = pickle.load(fp)
+    with open('../output/features.pkl', 'rb') as fp:
+        df = pickle.load(fp)
 
     print('Reading Done')
        
-	train_df = df[df['TARGET'].notnull()]
+    train_df = df[df['TARGET'].notnull()]
     test_df = df[df['TARGET'].isnull()]
 
     
