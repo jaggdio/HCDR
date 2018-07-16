@@ -374,47 +374,50 @@ if __name__ == '__main__':
 
     kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
     
-#==============================================================================
-#     train_df = df[df['TARGET'].notnull()]
-#     test_df = df[df['TARGET'].isnull()]
-# 
-#     
-#     search_spaces = {
-#         'learning_rate': (0.01, 1.0, 'log-uniform'),
-#         'min_child_weight': (0, 10),
-#         'max_depth': (0, 50),
-#         'max_delta_step': (0, 20),
-#         'subsample': (0.01, 1.0, 'uniform'),
-#         'colsample_bytree': (0.01, 1.0, 'uniform'),
-#         'colsample_bylevel': (0.01, 1.0, 'uniform'),
-#         'reg_lambda': (1e-9, 1000, 'log-uniform'),
-#         'reg_alpha': (1e-9, 1.0, 'log-uniform'),
-#         'gamma': (1e-9, 0.5, 'log-uniform'),
-#         'min_child_weight': (0, 5),
-#         'n_estimators': (50, 100),
-#         'scale_pos_weight': (1e-6, 500, 'log-uniform')
-#     }    
-# 
-#     estimator = LGBMClassifier(
-#         objective='binary',
-#         metric='auc'
-#     )
-# 
-#     opt = BayesSearchCV(
-#     estimator,
-#     search_spaces,
-#     n_iter=100,
-#     random_state=1234,
-#     verbose=0
-#     #scoring = 'accuracy'
-#     )
-#    
-#     y_train = train_df.TARGET.values
-#     X_train = train_df.drop('TARGET', axis=1)
-# 
-#     print(' ## Training ##')
-#     opt.fit(X_train, y_train, callback=status_print)
-#==============================================================================
+    train_df = df[df['TARGET'].notnull()]
+    test_df = df[df['TARGET'].isnull()]
+
+    
+    search_spaces = {
+        'learning_rate': (0.01, 1.0, 'log-uniform'),
+        'min_child_weight': (0, 10),
+        'max_depth': (0, 50),
+        'max_delta_step': (0, 20),
+        'subsample': (0.01, 1.0, 'uniform'),
+        'colsample_bytree': (0.01, 1.0, 'uniform'),
+        'colsample_bylevel': (0.01, 1.0, 'uniform'),
+        'reg_lambda': (1e-9, 1000, 'log-uniform'),
+        'reg_alpha': (1e-9, 1.0, 'log-uniform'),
+        'gamma': (1e-9, 0.5, 'log-uniform'),
+        'min_child_weight': (0, 5),
+        'n_estimators': (50, 100),
+        'scale_pos_weight': (1e-6, 500, 'log-uniform')
+    }    
+
+    estimator = LGBMClassifier(
+        objective='binary',
+        metric='auc'
+    )
+
+    opt = BayesSearchCV(
+    estimator,
+    search_spaces,
+    n_iter=100,
+    random_state=1234,
+    verbose=0,
+    
+    cv = KFold(
+        n_splits=5,
+        shuffle=True,
+        random_state=42)    
+    #scoring = 'accuracy'
+    )
+   
+    y_train = train_df.TARGET.values
+    X_train = train_df.drop('TARGET', axis=1)
+
+    print(' ## Training ##')
+    opt.fit(X_train, y_train, callback=status_print)
 
 
 
