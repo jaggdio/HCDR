@@ -396,6 +396,7 @@ if __name__ == '__main__':
 
     estimator = LGBMClassifier(
         objective='binary',
+        
         metric='auc'
     )
 
