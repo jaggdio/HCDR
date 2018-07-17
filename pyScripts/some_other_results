@@ -10,9 +10,16 @@ https://github.com/flowlight0/talkingdata-adtracking-fraud-detection
 # https://www.kaggle.com/chocozzz/lightgbm-parameter-tuning/code
 
 ## https://www.kaggle.com/nanomathias/bayesian-optimization-of-xgboost-lb-0-9769
+## https://github.com/Microsoft/LightGBM/issues/1339
+
 
 # unbalanced data
 ## https://github.com/Microsoft/LightGBM/issues/695
+
+## xg boost tuning
+https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/
+
+#https://medium.com/@pushkarmandot/https-medium-com-pushkarmandot-what-is-lightgbm-how-to-implement-it-how-to-fine-tune-the-parameters-60347819b7fc
 
 #
 http://blairhudson.com/blog/posts/optimising-hyper-parameters-efficiently-with-scikit-optimize/
@@ -31,7 +38,6 @@ https://www.kaggle.com/pranav84/lightgbm-fixing-unbalanced-data-lb-0-9680
 https://www.kaggle.com/abhinav97dutt/lightgbm-parameter-bayesian-optimization
 
 
-
 valid_0's auc: 0.786112
 
 Unknown parameter: gamma
@@ -39,5 +45,7 @@ Unknown parameter: gamma
 [LightGBM] [Warning] Accuracy may be bad since you didn't set num_leaves and 2^max_depth > num_leaves
 
 
+# com res
+https://medium.com/data-design/bosch-competition-a-data-science-project-mode-8th-place-solution-team-lajmburo-df8c345f9181
 
 

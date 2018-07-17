@@ -10,6 +10,7 @@ from functools import reduce
 
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
+from sklearn.model_selection import GridSearchCV
 from lightgbm import LGBMClassifier
 import xgboost as xgb
 
@@ -430,9 +431,17 @@ if __name__ == '__main__':
 
     #estimator = LGBMClassifier(
     #    objective='binary',
-        
-    #    metric='auc'
-    #)
+        metric='auc'
+    )
+    
+    search_spaces={
+    'max_depth': [2], #[3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
+    'subsample': [0.6], #[0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    'colsample_bytree': [0.5], #[0.5,0.6,0.7,0.8],
+    'n_estimators': [1000], #[1000,2000,3000]
+    'reg_alpha': [0.03] #[0.01, 0.02, 0.03, 0.04]
+    }
+    
 
 #==============================================================================
 #     opt = BayesSearchCV(
@@ -449,7 +458,7 @@ if __name__ == '__main__':
 #     #scoring = 'accuracy'
 #     )
 #==============================================================================
-   
+
     model = BayesSearchCV(
     estimator=xgb.XGBClassifier(
        ### n_jobs=4,
@@ -470,11 +479,61 @@ if __name__ == '__main__':
     refit=True,
     random_state=42
     )
+
+#==============================================================================
+#     model = BayesSearchCV(
+#     estimator=xgb.XGBClassifier(
+#         n_jobs=2,
+#         objective='binary:logistic',
+#         eval_metric='auc',
+#         silent=1
+#     ),
+#     search_spaces=search_spaces,
+#     scoring='roc_auc',
+#     cv=StratifiedKFold(
+#         n_splits=3,
+#         shuffle=False,
+#         random_state=42
+#     ),
+#     n_jobs=3,
+#     n_iter=10,
+#     verbose=1,
+#     refit=True,
+#     random_state=42
+#     )
+#     y_train = train_df.TARGET.values
+#     X_train = train_df.drop('TARGET', axis=1)
+#     
+#     estimator=xgb.XGBClassifier(
+#         n_jobs=2,
+#         objective='binary:logistic',
+#  #       eval_metric='auc',
+#         silent=1,
+#         verbose = 2
+#     )
+#==============================================================================
+    
     y_train = train_df.TARGET.values
     X_train = train_df.drop('TARGET', axis=1)
-
+     
+    gs = GridSearchCV(
+    estimator=estimator, param_grid=search_spaces, 
+    scoring='roc_auc',
+    cv=3,
+    refit=True,
+    verbose=10)
+    
     print(' ## Training ##')
-    model.fit(X_train, y_train, callback=status_print)
+    
+    #model.fit(X_train, y_train, callback=status_print)
+    
+    gs.fit(X_train, y_train)
+    best_est = gs.best_estimator_
+    
+    pdb.set_trace()
+    print(best_est)
+    
+    
 
     
         

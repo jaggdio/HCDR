@@ -15,9 +15,55 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 from lightgbm import LGBMClassifier
+import xgboost as xgb
+
 
 #%%
 
+from skopt import BayesSearchCV
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold, StratifiedKFold
+
+#%%
+
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, random_state=1234)
+
+
+#%%
+
+estimator=xgb.XGBClassifier(
+        n_jobs=2,
+        objective='binary:logistic',
+ #       eval_metric='auc',
+        silent=1,
+        verbose = 2
+    )
+
+param_test = { #'boosting_type' : ['gbdt'] ,
+'subsample': np.random.uniform(0.2,0.9,10)}         
+    
+#%%
+    
+gs = GridSearchCV(
+    estimator=estimator, param_grid=param_test, 
+    scoring='roc_auc',
+    cv=3,
+    refit=True,
+    
+    verbose=20)
+    
+#%%
+    
+gs.fit(X_train, y_train)    
+
+#%%
+
+
+
+#%%
 def status_print(optim_result):
     """Status callback durring bayesian hyperparameter search"""
     
@@ -54,11 +100,6 @@ opt.fit(X_train, y_train, callback=status_print)
 
 #%%
 
-from skopt import BayesSearchCV
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import KFold, StratifiedKFold
 
 #%%
 
@@ -159,7 +200,10 @@ param_test ={'num_leaves': np.arange(6,50),
              'reg_alpha': [0, 1e-1, 1, 2, 5, 7, 10, 50, 100],
              'reg_lambda': [0, 1e-1, 1, 5, 10, 20, 50, 100],
              'boosting_type' : ['gbdt']   }
-             
+#%%
+
+param_test = {'boosting_type' : ['gbdt'] ,
+'subsample': np.random.uniform(0.2,0.9,10)}             
 #%%
    estimator = LGBMClassifier(
         #n_jobs = 1,
@@ -171,27 +215,32 @@ param_test ={'num_leaves': np.arange(6,50),
         objective='binary',
         metric='None',
         n_estimators=500
-    )          
+    ) 
+
+#%%
+
+    
     
 #%%
-    
-gs = GridSearchCV(
-    estimator=estimator, param_grid=param_test, 
-    scoring='roc_auc',
-    cv=3,
-    refit=True,
-    
-    verbose=1)
+gs.grid_scores_
+
+gs.cv_validation_scores
     
 #%%
-    
-gs.fit(X_train, y_train)    
-    
-    
-    
-    
+from sklearn.metrics.scorer import accuracy_scorer
+def my_accuracy_scorer(*args):
+    score = accuracy_scorer(*args)
+    print('score is {}'.format(score))
+    return score
              
 #%%
+             
+clf = GridSearchCV(LogisticRegression(), {'C': [1, 2, 3]}, scoring=my_accuracy_scorer)
+clf.fit(np.random.randn(10, 4), np.random.randint(0, 2, 10))
+
+clf.grid_scores_
+
+
     
 import pandas as pd
 path = "/home/jayphate/Desktop/SampleTest.csv"
