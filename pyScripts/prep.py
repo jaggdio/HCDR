@@ -415,7 +415,7 @@ if __name__ == '__main__':
         'scale_pos_weight': (1e-6, 500, 'log-uniform')
     }
 
-    search_spaces = {
+    search_spaces2 = {
     'colsample_bylevel': (0.1, 1.0, 'uniform'),
     'colsample_bytree': (0.1, 1.0, 'uniform'),
     'gamma': (1e-09, 0.5, 'log-uniform'),
@@ -427,12 +427,7 @@ if __name__ == '__main__':
     'reg_alpha': (1e-09, 1.0, 'log-uniform'),
     'reg_lambda': (1e-09, 20, 'log-uniform'),
     'scale_pos_weight': (0.01, 20, 'log-uniform'),
-    'subsample': (0.01, 1.0, 'uniform')}    
-
-    #estimator = LGBMClassifier(
-    #    objective='binary',
-        metric='auc'
-    )
+    'subsample': (0.01, 1.0, 'uniform')} 
     
     search_spaces={
     'max_depth': [2], #[3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
@@ -458,27 +453,29 @@ if __name__ == '__main__':
 #     #scoring = 'accuracy'
 #     )
 #==============================================================================
-
-    model = BayesSearchCV(
-    estimator=xgb.XGBClassifier(
-       ### n_jobs=4,
-        objective='binary:logistic',
-        eval_metric='auc',
-        silent=0
-    ),
-    search_spaces=search_spaces,
-    scoring='roc_auc',
-    cv=StratifiedKFold(
-        n_splits=3,
-        shuffle=False,
-        random_state=42
-    ),
-    n_jobs=1,
-    n_iter=10,
-    verbose=1,
-    refit=True,
-    random_state=42
-    )
+#==============================================================================
+# 
+#     model = BayesSearchCV(
+#     estimator=xgb.XGBClassifier(
+#        ### n_jobs=4,
+#         objective='binary:logistic',
+#         eval_metric='auc',
+#         silent=0
+#     ),
+#     search_spaces=search_spaces,
+#     scoring='roc_auc',
+#     cv=StratifiedKFold(
+#         n_splits=3,
+#         shuffle=False,
+#         random_state=42
+#     ),
+#     n_jobs=1,
+#     n_iter=10,
+#     verbose=1,
+#     refit=True,
+#     random_state=42
+#     )
+#==============================================================================
 
 #==============================================================================
 #     model = BayesSearchCV(
@@ -515,7 +512,13 @@ if __name__ == '__main__':
     
     y_train = train_df.TARGET.values
     X_train = train_df.drop('TARGET', axis=1)
-     
+    
+    estimator=xgb.XGBClassifier(
+        n_jobs=2,
+        objective='binary:logistic',
+ #       eval_metric='auc',
+        silent=1)
+    
     gs = GridSearchCV(
     estimator=estimator, param_grid=search_spaces, 
     scoring='roc_auc',
@@ -532,9 +535,6 @@ if __name__ == '__main__':
     
     pdb.set_trace()
     print(best_est)
-    
-    
-
     
         
 #%%    
