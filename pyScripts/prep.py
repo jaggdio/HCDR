@@ -392,7 +392,7 @@ if __name__ == '__main__':
    # with open('../output/features.pkl', 'wb') as fp:
    #   pickle.dump(df, fp)
 
-    kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
+    #kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
     
     train_df = df[df['TARGET'].notnull()]
     test_df = df[df['TARGET'].isnull()]
@@ -428,11 +428,11 @@ if __name__ == '__main__':
     'scale_pos_weight': (0.01, 20, 'log-uniform'),
     'subsample': (0.01, 1.0, 'uniform')}    
 
-    estimator = LGBMClassifier(
-        objective='binary',
+    #estimator = LGBMClassifier(
+    #    objective='binary',
         
-        metric='auc'
-    )
+    #    metric='auc'
+    #)
 
 #==============================================================================
 #     opt = BayesSearchCV(
@@ -452,10 +452,10 @@ if __name__ == '__main__':
    
     model = BayesSearchCV(
     estimator=xgb.XGBClassifier(
-        n_jobs=4,
+       ### n_jobs=4,
         objective='binary:logistic',
         eval_metric='auc',
-        silent=1
+        silent=0
     ),
     search_spaces=search_spaces,
     scoring='roc_auc',
@@ -464,7 +464,7 @@ if __name__ == '__main__':
         shuffle=False,
         random_state=42
     ),
-    n_jobs=3,
+    n_jobs=1,
     n_iter=10,
     verbose=1,
     refit=True,
