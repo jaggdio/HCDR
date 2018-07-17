@@ -11,6 +11,7 @@ from functools import reduce
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 from lightgbm import LGBMClassifier
+import xgboost as xgb
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.model_selection import KFold, StratifiedKFold
@@ -31,7 +32,26 @@ warnings.filterwarnings('ignore')
 #%%
 
 def reduce_mem_usage(df):
-    """ iterate through all the columns of a dataframe and modify the data type
+    """ iterate through all the columns of a dataframodel = BayesSearchCV(
+    estimator=xgb.XGBClassifier(
+        n_jobs=4,
+        objective='binary:logistic',
+        eval_metric='auc',
+        silent=1
+    ),
+    search_spaces=search_spaces,
+    scoring='roc_auc',
+    cv=StratifiedKFold(
+        n_splits=3,
+        shuffle=False,
+        random_state=42
+    ),
+    n_jobs=3,
+    n_iter=ITERATIONS,
+    verbose=1,
+    refit=True,
+    random_state=42
+)me and modify the data type
         to reduce memory usage.        
     """
     start_mem = df.memory_usage().sum() / 1024**2
@@ -378,7 +398,7 @@ if __name__ == '__main__':
     test_df = df[df['TARGET'].isnull()]
 
     
-    search_spaces = {
+    search_spaces1 = {
         'learning_rate': (0.01, 1.0, 'log-uniform'),
         'min_child_weight': (0, 10),
         'max_depth': (0, 50),
@@ -392,7 +412,21 @@ if __name__ == '__main__':
         'min_child_weight': (0, 5),
         'n_estimators': (50, 100),
         'scale_pos_weight': (1e-6, 500, 'log-uniform')
-    }    
+    }
+
+    search_spaces = {
+    'colsample_bylevel': (0.1, 1.0, 'uniform'),
+    'colsample_bytree': (0.1, 1.0, 'uniform'),
+    'gamma': (1e-09, 0.5, 'log-uniform'),
+    'learning_rate': (0.01, 1.0, 'log-uniform'),
+    'max_delta_step': (0, 20),
+    'max_depth': (0, 50),
+    'min_child_weight': (0, 5),
+    'n_estimators': (50, 500),
+    'reg_alpha': (1e-09, 1.0, 'log-uniform'),
+    'reg_lambda': (1e-09, 20, 'log-uniform'),
+    'scale_pos_weight': (0.01, 20, 'log-uniform'),
+    'subsample': (0.01, 1.0, 'uniform')}    
 
     estimator = LGBMClassifier(
         objective='binary',
@@ -400,27 +434,47 @@ if __name__ == '__main__':
         metric='auc'
     )
 
-    opt = BayesSearchCV(
-    estimator,
-    search_spaces,
-    n_iter=100,
-    random_state=1234,
-    verbose=0,
-    
-    cv = KFold(
-        n_splits=5,
-        shuffle=True,
-        random_state=42)    
-    #scoring = 'accuracy'
-    )
+#==============================================================================
+#     opt = BayesSearchCV(
+#     estimator,
+#     search_spaces,
+#     n_iter=100,
+#     random_state=1234,
+#     verbose=0,
+#     
+#     cv = KFold(
+#         n_splits=5,
+#         shuffle=True,
+#         random_state=42)    
+#     #scoring = 'accuracy'
+#     )
+#==============================================================================
    
+    model = BayesSearchCV(
+    estimator=xgb.XGBClassifier(
+        n_jobs=4,
+        objective='binary:logistic',
+        eval_metric='auc',
+        silent=1
+    ),
+    search_spaces=search_spaces,
+    scoring='roc_auc',
+    cv=StratifiedKFold(
+        n_splits=3,
+        shuffle=False,
+        random_state=42
+    ),
+    n_jobs=3,
+    n_iter=10,
+    verbose=1,
+    refit=True,
+    random_state=42
+    )
     y_train = train_df.TARGET.values
     X_train = train_df.drop('TARGET', axis=1)
 
     print(' ## Training ##')
-    opt.fit(X_train, y_train, callback=status_print)
-
-
+    model.fit(X_train, y_train, callback=status_print)
 
     
         

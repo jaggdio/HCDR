@@ -49,7 +49,7 @@ paras = { 'C': Real(1e-6, 1e+6, prior='log-uniform'),
                     
 #%%
 
-opt = BayesSearchCV( SVC(), paras , n_iter=10,  scoring = 'accuracy', verbose=0, return_train_score=True )
+opt = BayesSearchCV( SVC(), paras , n_iter=10,  scoring = 'auc', verbose=0, return_train_score=True )
 opt.fit(X_train, y_train, callback=status_print)
 
 #%%
@@ -58,6 +58,7 @@ from skopt import BayesSearchCV
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold, StratifiedKFold
 
 #%%
 
@@ -102,7 +103,7 @@ estimator = LGBMClassifier(
         #silent=1,
         #tree_method='approx'
         objective='binary',
-        metric='auc'
+        metric='roc_auc'
     )
 #%%
     
@@ -129,7 +130,12 @@ opt = BayesSearchCV(
     search_spaces,
     n_iter=15,
     random_state=1234,
-    verbose=0
+    verbose=0,
+    cv = KFold(
+        n_splits=3,
+        shuffle=True,
+        random_state=42
+    )
     #scoring = 'accuracy'
 )
 
@@ -137,3 +143,74 @@ opt = BayesSearchCV(
 
 opt.fit(X_train, y_train, callback=status_print)
     
+#%%
+
+from sklearn.model_selection import GridSearchCV
+from scipy.stats import randint as sp_randint
+from scipy.stats import uniform as sp_uniform
+    
+#%%
+    
+param_test ={'num_leaves': np.arange(6,50), 
+             #'min_child_samples': np.random.randint(100, 500), 
+             'min_child_weight': [1e-5, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e4],
+             'subsample': np.random.uniform(0.2,0.9,10), 
+             'colsample_bytree': np.random.uniform(0.2,0.8,10),
+             'reg_alpha': [0, 1e-1, 1, 2, 5, 7, 10, 50, 100],
+             'reg_lambda': [0, 1e-1, 1, 5, 10, 20, 50, 100],
+             'boosting_type' : ['gbdt']   }
+             
+#%%
+   estimator = LGBMClassifier(
+        #n_jobs = 1,
+        #objective = 'binary:logistic',
+        #eval_metric = 'auc',
+        #silent=1,
+        #tree_method='approx'
+       
+        objective='binary',
+        metric='None',
+        n_estimators=500
+    )          
+    
+#%%
+    
+gs = GridSearchCV(
+    estimator=estimator, param_grid=param_test, 
+    scoring='roc_auc',
+    cv=3,
+    refit=True,
+    
+    verbose=1)
+    
+#%%
+    
+gs.fit(X_train, y_train)    
+    
+    
+    
+    
+             
+#%%
+    
+import pandas as pd
+path = "/home/jayphate/Desktop/SampleTest.csv"
+
+d = pd.read_csv(path )
+
+#%%
+
+d = d.fillna('NA')
+
+path = "/home/jayphate/Desktop/SampleTest2.csv"
+d.to_csv(path , index=False)
+
+#%%
+d.columns
+
+d.Email
+
+d.PhoneNumber
+
+
+
