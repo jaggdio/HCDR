@@ -427,14 +427,14 @@ if __name__ == '__main__':
     'reg_alpha': (1e-09, 1.0, 'log-uniform'),
     'reg_lambda': (1e-09, 20, 'log-uniform'),
     'scale_pos_weight': (0.01, 20, 'log-uniform'),
-    'subsample': (0.01, 1.0, 'uniform')} 
+    'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0]}#     'subsample':(0.01, 1.0, 'uniform')} 
     
     search_spaces={
-    'max_depth': [2], #[3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
-    'subsample': [0.6], #[0.4,0.5,0.6,0.7,0.8,0.9,1.0],
-    'colsample_bytree': [0.5], #[0.5,0.6,0.7,0.8],
-    'n_estimators': [1000], #[1000,2000,3000]
-    'reg_alpha': [0.03] #[0.01, 0.02, 0.03, 0.04]
+    'max_depth':  [3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
+    'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    'colsample_bytree': [0.5,0.6,0.7,0.8],
+    'n_estimators': [1000,2000,3000],
+    'reg_alpha': [0.01, 0.02, 0.03, 0.04]
     }
     
 
@@ -512,7 +512,11 @@ if __name__ == '__main__':
     
     y_train = train_df.TARGET.values
     X_train = train_df.drop('TARGET', axis=1)
+   # X_train= X_train.fillna((-999), inplace=True)
     
+    pdb.set_trace()
+    y_train = y_train[0:50000] 
+    X_train = X_train[0 : 50000]
     estimator=xgb.XGBClassifier(
         n_jobs=2,
         objective='binary:logistic',
@@ -522,16 +526,17 @@ if __name__ == '__main__':
     gs = GridSearchCV(
     estimator=estimator, param_grid=search_spaces, 
     scoring='roc_auc',
-    cv=3,
+    cv=None,
     refit=True,
     verbose=10)
     
     print(' ## Training ##')
     
     #model.fit(X_train, y_train, callback=status_print)
-    
+    pdb.set_trace()
     gs.fit(X_train, y_train)
     best_est = gs.best_estimator_
+    print(gs.best_params_)
     
     pdb.set_trace()
     print(best_est)
