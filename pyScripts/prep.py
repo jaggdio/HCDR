@@ -427,6 +427,7 @@ if __name__ == '__main__':
     'reg_alpha': (1e-09, 1.0, 'log-uniform'),
     'reg_lambda': (1e-09, 20, 'log-uniform'),
     'scale_pos_weight': (0.01, 20, 'log-uniform'),
+
     'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0]}#     'subsample':(0.01, 1.0, 'uniform')} 
     
     search_spaces={

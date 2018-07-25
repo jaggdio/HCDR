@@ -18,6 +18,8 @@ https://github.com/flowlight0/talkingdata-adtracking-fraud-detection
 
 ## xg boost tuning
 https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/
+https://www.kaggle.com/naokishibuya/xgboot-with-gridsearchcv
+
 
 #https://medium.com/@pushkarmandot/https-medium-com-pushkarmandot-what-is-lightgbm-how-to-implement-it-how-to-fine-tune-the-parameters-60347819b7fc
 
@@ -48,4 +50,11 @@ Unknown parameter: gamma
 # com res
 https://medium.com/data-design/bosch-competition-a-data-science-project-mode-8th-place-solution-team-lajmburo-df8c345f9181
 
+validation = best_est.predict_proba(X_train)
+print("Roc AUC: ", roc_auc_score(y_train, validation[:,1], average='macro'))
+
+# CLustering
+https://www.learndatasci.com/tutorials/k-means-clustering-algorithms-python-intro/
+
+ X_train.to_csv('X_train.csv')
 

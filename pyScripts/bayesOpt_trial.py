@@ -17,6 +17,8 @@ import numpy as np
 from lightgbm import LGBMClassifier
 import xgboost as xgb
 
+from sklearn.model_selection import GridSearchCV
+
 
 #%%
 
@@ -37,6 +39,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, rando
 estimator=xgb.XGBClassifier(
         n_jobs=2,
         objective='binary:logistic',
+        early_stopping_rounds=5,
  #       eval_metric='auc',
         silent=1,
         verbose = 2
@@ -61,7 +64,37 @@ gs.fit(X_train, y_train)
 
 #%%
 
+def map_entity_with_abbreviations(entity, abbr_act_pair):
+            
+            #entity = 'united states'
+            #abbr_act_pair = 'US' + ':' + 'united states'
+            if entity == 'NIL':
+                entity = ""
+                
+            abbr_list = abbr_act_pair.split(',')
+            
+            if abbr_act_pair != "":
+                for a in abbr_list:
+                   print(a)
+                   x = a.split(':')
+                   abbr = x[0]
+                   abbr_val = x[1]
+                   
+                   if entity == abbr_val:
+                       if "," in entity :
+                           entity = entity + abbr
+                       else:
+                           entity = abbr + ","            
+            return entity.rstrip(',')             
+        
 
+#%%
+
+_abbr_stateC
+_abbr_countryC
+
+org_StateInTextBlock
+org_CountryInTextBlock
 
 #%%
 def status_print(optim_result):
