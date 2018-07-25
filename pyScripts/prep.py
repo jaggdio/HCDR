@@ -389,6 +389,8 @@ if __name__ == '__main__':
     
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
+    pdb.set_trace()
+    df.to_csv("../output/hcdr_f.csv", index=False)
     
    # with open('../output/features.pkl', 'wb') as fp:
    #   pickle.dump(df, fp)
