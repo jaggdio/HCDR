@@ -8,6 +8,7 @@ Created on Sun Jul 22 00:26:02 2018
 #%%
 import pandas as pd
 import numpy as np
+import pdb
 
 #%%
 
@@ -90,6 +91,7 @@ data_train_neg['y_kmeans'] = y_kmeans
 
 #%%
 
+pdb.set_trace()
 X_sub = data_train_neg[data_train_neg.y_kmeans == 4]
 
 X_final = pd.concat([X_sub, data_train_pos])
