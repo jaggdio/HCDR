@@ -5,7 +5,7 @@ Created on Wed Jun  6 10:33:28 2018
 @author: jayphate
 """
 # https://www.kaggle.com/georsara1/lightgbm-all-tables-included-0-778/code
-
+import pdb
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
@@ -28,7 +28,7 @@ payments = pd.read_csv('../input/installments_payments.csv')
 lgbm_submission = pd.read_csv('../input/sample_submission.csv')
 
 #Separate target variable
-y = data['TARGET']
+y =  data['TARGET']
 del data['TARGET']
 
 #Feature engineering
@@ -132,6 +132,7 @@ print('Removing features with more than 80% missing...')
 test = test[test.columns[data.isnull().mean() < 0.85]]
 data = data[data.columns[data.isnull().mean() < 0.85]]
 
+pdb.set_trace()
 #Delete customer Id
 del data['SK_ID_CURR']
 del test['SK_ID_CURR']
