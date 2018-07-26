@@ -8,7 +8,6 @@ Created on Sun Jul 22 00:26:02 2018
 #%%
 import pandas as pd
 import numpy as np
-import pdb
 
 #%%
 
@@ -39,6 +38,7 @@ print(len(not_null_cols))
 
 y = data_train_neg[not_null_cols].TARGET.values
 X = data_train_neg[not_null_cols].drop('TARGET', axis=1)
+X = data_train_neg[not_null_cols].drop('SK_ID_CURR', axis=1)
 
 
 #%%
@@ -84,59 +84,12 @@ kmeans = KMeans(n_clusters=10)
 kmeans.fit(X)
 y_kmeans = kmeans.predict(X)
 
-#%%
-
-data_train_neg['y_kmeans'] = y_kmeans
-#X['TARGET'] = y
-
-#%%
-
 pdb.set_trace()
-X_sub = data_train_neg[data_train_neg.y_kmeans == 4]
-
-X_final = pd.concat([X_sub, data_train_pos])
 
 #%%
-
-import xgboost as xgb
-
-#%%
-
-xgb1 = xgb.XGBClassifier(
- learning_rate =0.1,
- n_estimators=200,
- max_depth=5,
- min_child_weight=1,
- gamma=0,
- subsample=0.8,
- colsample_bytree=0.8,
- objective= 'binary:logistic',
- nthread=4,
- scale_pos_weight=1,
- seed=27)
-
-#%%
-
-xgb_param = xgb1.get_xgb_params()
-
-#%%
-
-ytrain =  X_final.TARGET.values
-dtrain = X_final.drop('TARGET', axis=1)
-
-#%%
-
-#xgtrain = 
-
-xgtrain = xgb.DMatrix(dtrain.values, label=ytrain)
-
-#%%
-cvresult = xgb.cv(xgb_param, xgtrain, 
-                  num_boost_round=xgb1.get_params()['n_estimators'], nfold=3,
-            metrics='auc', early_stopping_rounds=50, verbose_eval = 2) #show_progress=True
-        
-##alg.set_params(n_estimators=cvresult.shape[0])
-        
-#%%        
+data_train_neg['y_kmeans'] = y_kmeans
+data_train_pos['y_kmeans'] = -1
 
 
+df = pd.concat([data_train_neg, data_train_pos])
+df.to_csv("../output/train_features.csv", index=False)
