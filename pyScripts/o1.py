@@ -132,7 +132,6 @@ print('Removing features with more than 80% missing...')
 test = test[test.columns[data.isnull().mean() < 0.85]]
 data = data[data.columns[data.isnull().mean() < 0.85]]
 
-pdb.set_trace()
 #Delete customer Id
 #del data['SK_ID_CURR']
 #del test['SK_ID_CURR']
@@ -184,6 +183,8 @@ lgbm = lgb.train(params,
                  early_stopping_rounds= 40,
                  verbose_eval= 10
                  )
+
+pdb.set_trace()
 
 #Predict on test set and write to submit
 predictions_lgbm_prob = lgbm.predict(test)
