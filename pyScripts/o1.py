@@ -134,11 +134,21 @@ data = data[data.columns[data.isnull().mean() < 0.85]]
 
 pdb.set_trace()
 #Delete customer Id
+#del data['SK_ID_CURR']
+#del test['SK_ID_CURR']
+
+#Create train and validation set
+train_x, valid_x, train_y, valid_y = train_test_split(data, y, test_size=0.2, random_state=42)
+
+other_cv = pd.DataFrame({"SK_ID_CURR":valid_x.SK_ID_CURR.values})
+other_cv.to_csv("../output/other_cv.csv", index=False)
+
 del data['SK_ID_CURR']
 del test['SK_ID_CURR']
 
-#Create train and validation set
-train_x, valid_x, train_y, valid_y = train_test_split(data, y, test_size=0.2)
+del train_x['SK_ID_CURR']
+del valid_x['SK_ID_CURR']
+
 
 #------------------------Build LightGBM Model-----------------------
 train_data=lgb.Dataset(train_x,label=train_y)
@@ -180,7 +190,7 @@ predictions_lgbm_prob = lgbm.predict(test)
 
 lgbm_submission.TARGET = predictions_lgbm_prob
 
-lgbm_submission.to_csv('lgbm_submission.csv', index=False)
+#lgbm_submission.to_csv('lgbm_submission.csv', index=False)
 
 #Plot Variable Importances
 #lgb.plot_importance(lgbm, max_num_features=21, importance_type='split')
