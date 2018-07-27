@@ -130,7 +130,7 @@ for i in data_neg.y_kmeans.unique():
 
     ## save model ##
     model_path = "../output/" + model_name+".joblib.dat"
-    joblib.dump(model, "../output/pima.joblib.dat")
+    joblib.dump(model, model_path)
     
 
     print (" ## Train Report ##\n")
