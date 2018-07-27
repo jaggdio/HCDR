@@ -1,12 +1,12 @@
 # load data
 
 
-
+from __future__ import division
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, roc_auc_score
 
-from __future__ import division
+
 from sklearn.externals import joblib
 
 import xgboost as xgb
