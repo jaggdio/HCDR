@@ -85,7 +85,7 @@ for i in data_neg.y_kmeans.unique():
         evals=[(DTest, "Test")],
         early_stopping_rounds=40, verbose_eval=2)
 
-    model_name = "m" + i
+    model_name = "m" + str(i)
     print("################ " + model_name +  " ################")
     print("Model Name: {} and Best AUC: {:.2f} with {} rounds".format(model_name, model.best_score, model.best_iteration+1))
                 
