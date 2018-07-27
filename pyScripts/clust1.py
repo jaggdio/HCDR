@@ -8,6 +8,7 @@ Created on Sun Jul 22 00:26:02 2018
 #%%
 import pandas as pd
 import numpy as np
+import pdb
 
 #%%
 
@@ -38,7 +39,7 @@ print(len(not_null_cols))
 
 y = data_train_neg[not_null_cols].TARGET.values
 X = data_train_neg[not_null_cols].drop('TARGET', axis=1)
-X = data_train_neg[not_null_cols].drop('SK_ID_CURR', axis=1)
+X = X.drop('SK_ID_CURR', axis=1)
 
 
 #%%

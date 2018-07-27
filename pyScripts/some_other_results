@@ -59,3 +59,11 @@ https://www.learndatasci.com/tutorials/k-means-clustering-algorithms-python-intr
 
  X_train.to_csv('X_train.csv')
 
+########
+valid_0's auc: 0.782866  # 0.78286555186
+
+array([[56383,  4708],
+       [  171,   241]])
+
+
+
