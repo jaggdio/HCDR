@@ -139,7 +139,7 @@ for i in data_neg.y_kmeans.unique():
     print (" ## Test Report ##\n")
     print classification_report(y_test, pred_test)
 
-    del y_train, del pred_train, del y_test, del pred_test; del model; gc.collect()
+    del y_train; del pred_train; del y_test; del pred_test; del model; gc.collect()
 
 cm_tags.to_csv("../output/cm_tags.csv", index=False)
 scores.to_csv("../output/scores.csv", index=False)
