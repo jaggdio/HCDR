@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import gc
 import time
+import pdb
 
 def get_cm_tags(act, pred):
     
@@ -41,7 +42,10 @@ data = data[np.in1d(data.SK_ID_CURR, other_cv.SK_ID_CURR, invert=True)]
 data_neg = data[data.TARGET == 0]
 data_pos = data[data.TARGET == 1]
 
-data_neg.y_kmeans[(data_neg.y_kmeans == 1) | (data_neg.y_kmeans ==8) | (data_neg.y_kmeans ==5) | (data_neg.y_kmeans ==6) | (data_neg.y_kmeans ==9)] = 10
+#pdb.set_trace()
+# 1, 8, 5, 6, 9
+# 3, 7, 5, 4, 9
+data_neg.y_kmeans[(data_neg.y_kmeans == 3) | (data_neg.y_kmeans ==7) | (data_neg.y_kmeans ==5) | (data_neg.y_kmeans ==4) | (data_neg.y_kmeans ==9)] = 10
 
 params = {
     # Parameters that we are going to tune.

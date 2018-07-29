@@ -12,6 +12,7 @@ import numpy as np
 import gc
 import time
 
+
 other_cv = pd.read_csv("../output/other_cv.csv")
 #other_cv.columns = ['SK_ID_CURR']
 
