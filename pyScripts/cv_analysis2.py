@@ -34,7 +34,6 @@ def get_cm_tags(act, pred):
     cm_df['cm_tags'][(cm_df.ACT == 1) & (cm_df.PRED == 0)] = 'FN'
     return cm_df
 
-
 cm_tags_path = "../output/cm_tags.csv"
 cm_tags = pd.read_csv(cm_tags_path)
 cm_tags_train = cm_tags[cm_tags['Type'] == 'train']
@@ -125,7 +124,7 @@ model = xgb.train(
         evals=[(DTest, "Test")],
         early_stopping_rounds=40, verbose_eval=2)
 
-model = joblib.load("../output/model_retrain.joblib.dat")
+#model = joblib.load("../output/model_retrain.joblib.dat")
 print("Model Name: {} and Best AUC: {:.2f} with {} rounds".format("Model", model.best_score, model.best_iteration+1))
 
 #######
@@ -154,7 +153,23 @@ test_cm_tags['SK_ID_CURR'] = test_data.SK_ID_CURR.values
 test_cm_tags_fp = test_cm_tags[test_cm_tags.cm_tags == 'FP']
 
 data_testFP_subset = data[np.in1d(data.SK_ID_CURR.values, test_cm_tags_fp.SK_ID_CURR.unique())]
-        
+
+#data_testFP_subset2 =
+#data_testFP_subset3 =
+
+###########################
+# Train the model again
+train_data = pd.concat([sub1, sub2])
+train_data = pd.concat([train_data, data_testFP_subset])
+
+y = train_data.TARGET.values
+train_data = train_data.drop('TARGET', axis=1)
+train_data = train_data.drop('y_kmeans', axis=1)
+
+DTrain = xgb.DMatrix(train_data.drop('SK_ID_CURR', axis=1), y)
+xgb.cv(params, DTrain, num_boost_round = 999, early_stopping_rounds=40, verbose_eval=2 )
+
+
 ############################
 
 train1_TN_prob = model.predict(Dtrain1SubTN)
@@ -190,7 +205,7 @@ for x in clust_names:
 pdb.set_trace()
 sub3 = data[np.in1d( data.SK_ID_CURR.values, rest)]
 
-train_data = pd.concat([train_data, sub3])
+#train_data = pd.concat([train_data, sub3])
    
 
 ##########################

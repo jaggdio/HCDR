@@ -77,7 +77,7 @@ for m in models :
 pdb.set_trace()    
 neg_set_ids = pd.DataFrame({'SK_ID_CURR' : neg_set_ids,
                             'm_names' : m_names})    
-#neg_set_ids.to_csv("../output/neg_set_ids.csv", index=False)
+neg_set_ids.to_csv("../output/neg_set_ids.csv", index=False)
 
 rest_frame = pd.DataFrame({'SK_ID_CURR' : rest,
                             'm_names' : m_names_for_rest})
