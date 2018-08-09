@@ -87,6 +87,7 @@ def application_train_test(num_rows = None, nan_as_category = False):
     
 def previous_applications(num_rows = None, nan_as_category = True):
     prev = pd.read_csv('../input/previous_application.csv', nrows = num_rows)
+    prev = prev.fillna(0)
     prev, cat_cols = one_hot_encoder(prev, nan_as_category= True)
     # Days 365.243 values -> nan
     prev['DAYS_FIRST_DRAWING'].replace(365243, np.nan, inplace= True)
@@ -141,6 +142,7 @@ def previous_applications(num_rows = None, nan_as_category = True):
 # Preprocess POS_CASH_balance.csv
 def pos_cash(num_rows = None, nan_as_category = True):
     pos = pd.read_csv('../input/POS_CASH_balance.csv', nrows = num_rows)
+    pos = pos.fillna(0)
     pos, cat_cols = one_hot_encoder(pos, nan_as_category= True)
     # Features
     aggregations = {
@@ -157,7 +159,7 @@ def pos_cash(num_rows = None, nan_as_category = True):
     pos_agg['POS_COUNT'] = pos.groupby('SK_ID_CURR').size()
     del pos
     gc.collect()
-    return pos_agg
+    return pos_agg.fillna(0)
     
     
 # Preprocess installments_payments.csv
