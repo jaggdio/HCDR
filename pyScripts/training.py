@@ -49,11 +49,11 @@ data_neg.y_kmeans[(data_neg.y_kmeans == 3) | (data_neg.y_kmeans ==7) | (data_neg
 
 params = {
     # Parameters that we are going to tune.
-    'max_depth':6,
+    'max_depth':7,
     'min_child_weight': 1,
     'eta':.3,
-    'subsample': 1,
-    'colsample_bytree': 1,
+    'subsample': 0.8,
+    'colsample_bytree': 0.8,
     # Other parameters
     'objective' : 'binary:logistic',
     'eval_metric' : 'auc'

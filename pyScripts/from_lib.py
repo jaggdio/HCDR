@@ -52,6 +52,22 @@ def application_train_test(num_rows = None, nan_as_category = False):
     df['NEW_PHONE_TO_BIRTH_RATIO'] = df['DAYS_LAST_PHONE_CHANGE'] / df['DAYS_BIRTH']
     df['NEW_PHONE_TO_EMPLOY_RATIO'] = df['DAYS_LAST_PHONE_CHANGE'] / df['DAYS_EMPLOYED']
     df['NEW_CREDIT_TO_INCOME_RATIO'] = df['AMT_CREDIT'] / df['AMT_INCOME_TOTAL']
+
+    df['children_ratio'] = df['CNT_CHILDREN'] / df['CNT_FAM_MEMBERS']
+    df['income_credit_percentage'] = df['AMT_INCOME_TOTAL'] / df['AMT_CREDIT']
+    df['income_per_person'] = df['AMT_INCOME_TOTAL'] / df['CNT_FAM_MEMBERS']
+    df['payment_rate'] = df['AMT_ANNUITY'] / df['AMT_CREDIT']
+
+    df['edfternal_sources_weighted'] = df.EdfT_SOURCE_1 * 2 + df.EdfT_SOURCE_2 * 3 + df.EdfT_SOURCE_3 * 4
+    df['cnt_non_child'] = df['CNT_FAM_MEMBERS'] - df['CNT_CHILDREN']
+    df['child_to_non_child_ratio'] = df['CNT_CHILDREN'] / df['cnt_non_child']
+    df['income_per_non_child'] = df['AMT_INCOME_TOTAL'] / df['cnt_non_child']
+    df['credit_per_person'] = df['AMT_CREDIT'] / df['CNT_FAM_MEMBERS']
+    df['credit_per_child'] = df['AMT_CREDIT'] / (1 + df['CNT_CHILDREN'])
+    df['credit_per_non_child'] = df['AMT_CREDIT'] / df['cnt_non_child']
+
+    df['short_employment'] = (df['DAYS_EMPLOYED'] < -2000).astype(int)
+    df['young_age'] = (df['DAYS_BIRTH'] < -14000).astype(int)
     
     # Categorical features with Binary encode (0 or 1; two categories)
     for bin_feature in ['CODE_GENDER', 'FLAG_OWN_CAR', 'FLAG_OWN_REALTY']:
@@ -101,7 +117,7 @@ def previous_applications(num_rows = None, nan_as_category = True):
     z = num_aggregations.copy()   # start with x's keys and values
     z.update(cat_aggregations )
     #prev_agg = prev.groupby('SK_ID_CURR').agg({**num_aggregations, **cat_aggregations})
-    prev_agg = prev.groupby('SK_ID_CURR').agg( z)
+    prev_agg = prev.groupby('SK_ID_CURR').agg( z )
     prev_agg.columns = pd.Index(['PREV_' + e[0] + "_" + e[1].upper() for e in prev_agg.columns.tolist()])
     # Previous Applications: Approved Applications - only numerical features
     approved = prev[prev['NAME_CONTRACT_STATUS_Approved'] == 1]
@@ -120,7 +136,7 @@ def previous_applications(num_rows = None, nan_as_category = True):
         prev_agg['NEW_RATIO_PREV_' + e[0] + "_" + e[1].upper()] = prev_agg['APPROVED_' + e[0] + "_" + e[1].upper()] / prev_agg['REFUSED_' + e[0] + "_" + e[1].upper()]
     
     gc.collect()
-    return prev_agg
+    return prev_agg.fillna(0)
     
 # Preprocess POS_CASH_balance.csv
 def pos_cash(num_rows = None, nan_as_category = True):
@@ -147,6 +163,8 @@ def pos_cash(num_rows = None, nan_as_category = True):
 # Preprocess installments_payments.csv
 def installments_payments(num_rows = None, nan_as_category = True):
     ins = pd.read_csv('../input/installments_payments.csv', nrows = num_rows)
+    ins = ins.fillna(0)
+    
     ins, cat_cols = one_hot_encoder(ins, nan_as_category= True)
     # Percentage and difference paid in each installment (amount paid and installment value)
     ins['PAYMENT_PERC'] = ins['AMT_PAYMENT'] / ins['AMT_INSTALMENT']
@@ -161,7 +179,7 @@ def installments_payments(num_rows = None, nan_as_category = True):
         'NUM_INSTALMENT_VERSION': ['nunique'],
         'DPD': ['max', 'mean', 'sum'],
         'DBD': ['max', 'mean', 'sum'],
-        'PAYMENT_PERC': ['max', 'mean', 'sum', 'var'],
+        'PAYMENT_PERC': ['max', 'mean', 'sum', 'var'], 
         'PAYMENT_DIFF': ['max', 'mean', 'sum', 'var'],
         'AMT_INSTALMENT': ['max', 'mean', 'sum'],
         'AMT_PAYMENT': ['min', 'max', 'mean', 'sum'],
@@ -175,12 +193,14 @@ def installments_payments(num_rows = None, nan_as_category = True):
     ins_agg['INSTAL_COUNT'] = ins.groupby('SK_ID_CURR').size()
     del ins
     gc.collect()
-    return ins_agg
+    return ins_agg.fillna(0)
     
     
 # Preprocess credit_card_balance.csv
 def credit_card_balance(num_rows = None, nan_as_category = True):
     cc = pd.read_csv('../input/credit_card_balance.csv', nrows = num_rows)
+    cc = cc.fillna(0)
+
     cc, cat_cols = one_hot_encoder(cc, nan_as_category= True)
     # General aggregations
     cc.drop(['SK_ID_PREV'], axis= 1, inplace = True)
@@ -190,6 +210,6 @@ def credit_card_balance(num_rows = None, nan_as_category = True):
     cc_agg['CC_COUNT'] = cc.groupby('SK_ID_CURR').size()
     del cc
     gc.collect()
-    return cc_agg
+    return cc_agg.fillna(0)
     
     

@@ -85,11 +85,11 @@ TN_subset_fromTR1 = data[np.in1d( data.SK_ID_CURR.values, resst_TN )]
 
 params = {
     # Parameters that we are going to tune.
-    'max_depth':6,
+    'max_depth':4,
     'min_child_weight': 1,
-    'eta':.3,
-    'subsample': 1,
-    'colsample_bytree': 1,
+    'eta':.01,
+    'subsample': 0.8,
+    'colsample_bytree': 0.8,
     # Other parameters
     'objective' : 'binary:logistic',
     'eval_metric' : 'auc'
@@ -104,6 +104,9 @@ train_data = train_data.drop('y_kmeans', axis=1)
 
 test_data  = test_data.drop('TARGET', axis=1)
 test_data = test_data.drop('y_kmeans', axis=1)
+
+train_data = pd.concat([train_data, test_data], axis=0)
+y = np.append(y, y_test)
 
 TN_subset_fromTR1 = TN_subset_fromTR1.drop('TARGET', axis=1)
 TN_subset_fromTR1 = TN_subset_fromTR1.drop('y_kmeans', axis=1)
@@ -120,13 +123,28 @@ Dtrain1SubTN = xgb.DMatrix(TN_subset_fromTR1.drop('SK_ID_CURR', axis=1), label=y
 model = xgb.train(
         params,
         DTrain,
-        num_boost_round=999,
+        num_boost_round=1000,
         evals=[(DTest, "Test")],
-        early_stopping_rounds=40, verbose_eval=2)
+        early_stopping_rounds=30, verbose_eval=2)
 
 #model = joblib.load("../output/model_retrain.joblib.dat")
 print("Model Name: {} and Best AUC: {:.2f} with {} rounds".format("Model", model.best_score, model.best_iteration+1))
 
+############
+
+pred_train_prob = model.predict(DTrain)
+pred_train = pred_train_prob > 0.5
+pred_train = pred_train.astype(int) 
+train_tn, train_fp, train_fn, train_tp = confusion_matrix(y, pred_train).ravel()
+print(confusion_matrix(pred_train, y))
+print roc_auc_score(y, pred_train_prob )
+#print classification_report(y_train, pred_train)
+
+train_cm_tags = get_cm_tags(y_train, pred_train)
+train_cm_tags['Score'] = pred_train_prob
+train_cm_tags['Type'] = 'train'
+train_cm_tags['SK_ID_CURR'] = X_train.SK_ID_CURR.values
+train_cm_tags['m_name'] = model_name
 #######
 
 #save model
@@ -158,6 +176,7 @@ data_testFP_subset = data[np.in1d(data.SK_ID_CURR.values, test_cm_tags_fp.SK_ID_
 #data_testFP_subset3 =
 
 ###########################
+pdb.set_trace()
 # Train the model again
 train_data = pd.concat([sub1, sub2])
 train_data = pd.concat([train_data, data_testFP_subset])
