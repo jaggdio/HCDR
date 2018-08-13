@@ -23,7 +23,14 @@ def application_train_test(num_rows = None, nan_as_category = False):
     df = pd.read_csv('../input/application_train.csv', nrows= num_rows)
     test_df = pd.read_csv('../input/application_test.csv', nrows= num_rows)
     print("Train samples: {}, test samples: {}".format(len(df), len(test_df)))
+    
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    continuous_vars = [c for c in df.columns.values if df[c].dtype in numerics]
+    df[continuous_vars] = df[continuous_vars].fillna(0)
+    
     df = df.append(test_df).reset_index()
+    
+    
     # Optional: Remove 4 applications with XNA CODE_GENDER (train set)
     df = df[df['CODE_GENDER'] != 'XNA']
     
@@ -31,7 +38,8 @@ def application_train_test(num_rows = None, nan_as_category = False):
     live = [_f for _f in df.columns if ('FLAG_' in _f) & ('FLAG_DOC' not in _f) & ('_FLAG_' not in _f)]
     
     # NaN values for DAYS_EMPLOYED: 365.243 -> nan
-    df['DAYS_EMPLOYED'].replace(365243, np.nan, inplace= True)
+    #df['DAYS_EMPLOYED'].replace(365243, np.nan, inplace= True)
+    df['DAYS_EMPLOYED'].replace(365243, 0, inplace= True)
 
     inc_by_org = df[['AMT_INCOME_TOTAL', 'ORGANIZATION_TYPE']].groupby('ORGANIZATION_TYPE').median()['AMT_INCOME_TOTAL']
 
@@ -58,7 +66,7 @@ def application_train_test(num_rows = None, nan_as_category = False):
     df['income_per_person'] = df['AMT_INCOME_TOTAL'] / df['CNT_FAM_MEMBERS']
     df['payment_rate'] = df['AMT_ANNUITY'] / df['AMT_CREDIT']
 
-    df['edfternal_sources_weighted'] = df.EdfT_SOURCE_1 * 2 + df.EdfT_SOURCE_2 * 3 + df.EdfT_SOURCE_3 * 4
+    df['edfternal_sources_weighted'] = df.EXT_SOURCE_1 * 2 + df.EXT_SOURCE_2 * 3 + df.EXT_SOURCE_3 * 4
     df['cnt_non_child'] = df['CNT_FAM_MEMBERS'] - df['CNT_CHILDREN']
     df['child_to_non_child_ratio'] = df['CNT_CHILDREN'] / df['cnt_non_child']
     df['income_per_non_child'] = df['AMT_INCOME_TOTAL'] / df['cnt_non_child']

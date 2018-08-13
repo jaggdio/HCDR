@@ -5,8 +5,13 @@ Created on Wed Jun 27 11:12:20 2018
 @author: jayphate
 """
 #%%
+# lightgbm
 
+from __future__ import division
 from functools import reduce
+
+
+from sklearn.model_selection import train_test_split
 
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
@@ -138,53 +143,66 @@ def bureau_features(bureau, bb_aggrigations):
     crd_active_currency = add_SK_ID_CURR_to_crossTabRes(crd_active_currency )
 
     # NaN menas there is no values for credit status
-    crd_days_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns=bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_CREDIT_YRS'], aggfunc=np.mean, dropna=False)
-    crd_days_by_active_status.rename(columns=lambda x : 'DAYS_CREDIT_YRS_' + x, inplace=True) 
+    crd_days_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns=bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_CREDIT_YRS'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
+    #crd_days_by_active_status.rename(columns=lambda x : 'DAYS_CREDIT_YRS_' + x, inplace=True) 
+    crd_days_by_active_status.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_days_by_active_status.columns.tolist()])
     crd_days_by_active_status = add_SK_ID_CURR_to_crossTabRes(crd_days_by_active_status)
     
 
-    crd_enddate_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns = bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_CREDIT_ENDDATE_YRS'], aggfunc=np.mean, dropna=False) 
-    crd_enddate_by_active_status.rename(columns=lambda x: 'DAYS_CREDIT_ENDDATE_YRS_' + x, inplace=True)
+    crd_enddate_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns = bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_CREDIT_ENDDATE_YRS'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False) 
+    #crd_enddate_by_active_status.rename(columns=lambda x: 'DAYS_CREDIT_ENDDATE_YRS_' + x, inplace=True)
+    crd_enddate_by_active_status.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_enddate_by_active_status.columns.tolist()])
     crd_enddate_by_active_status = add_SK_ID_CURR_to_crossTabRes(crd_enddate_by_active_status)
     
-    crd_enddate_fact_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns = bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_ENDDATE_FACT_YRS'], aggfunc=np.mean, dropna=False)
-    crd_enddate_fact_by_active_status.rename(columns = lambda x : 'DAYS_ENDDATE_FACT_YRS_' + x, inplace=True)
+    crd_enddate_fact_by_active_status = pd.crosstab(index=bureau_years['SK_ID_CURR'], columns = bureau_years['CREDIT_ACTIVE'], values=bureau_years['DAYS_ENDDATE_FACT_YRS'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
+    #crd_enddate_fact_by_active_status.rename(columns = lambda x : 'DAYS_ENDDATE_FACT_YRS_' + x, inplace=True)
+    crd_enddate_fact_by_active_status.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_enddate_fact_by_active_status.columns.tolist()])
     crd_enddate_fact_by_active_status = add_SK_ID_CURR_to_crossTabRes(crd_enddate_fact_by_active_status)
     
     # 
-    crd_day_overdue = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'CREDIT_DAY_OVERDUE_YRS':'mean'})
+    crd_day_overdue = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'CREDIT_DAY_OVERDUE_YRS':['min', 'max', 'mean', 'var']})
+    crd_day_overdue.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_overdue.columns.tolist()])
 
     # NaN means no overdue
-    crd_max_amt_overdue  = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_CREDIT_MAX_OVERDUE':'mean'})
+    crd_max_amt_overdue  = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_CREDIT_MAX_OVERDUE':['min', 'max', 'mean', 'var']})
+    crd_max_amt_overdue.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_max_amt_overdue.columns.tolist()])
 
     # 
     crd_cnt_prolong = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'CNT_CREDIT_PROLONG':'sum'})
 
     # current credit ammount
-    crd_amt_sum = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM'], aggfunc=np.mean, dropna=False)
+    # [np.mean, np.median, min, max, np.std]
+    crd_amt_sum = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
     crd_amt_sum.rename(columns= lambda x : 'AMT_CREDIT_SUM_' + x, inplace=True) 
     crd_amt_sum['SK_ID_CURR'] = crd_amt_sum.index.values
     
     # current debt on Credit Bureau Credit
-    crd_amt_debt = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_DEBT'], aggfunc=np.mean, dropna=False)
-    crd_amt_debt.rename(columns= lambda x : 'AMT_CREDIT_SUM_DEBT_' + x, inplace=True) 
+    crd_amt_debt = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_DEBT'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
+    #crd_amt_debt.rename(columns= lambda x : 'AMT_CREDIT_SUM_DEBT_' + x, inplace=True) 
+    crd_amt_debt.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_amt_debt.columns.tolist()])
     crd_amt_debt = add_SK_ID_CURR_to_crossTabRes(crd_amt_debt)
 
     # current credit limit  
-    crd_sum_limit = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_LIMIT'], aggfunc=np.sum, dropna=False)
-    crd_sum_limit.rename(columns= lambda x : 'AMT_CREDIT_SUM_LIMIT_' + x , inplace=True) 
+    crd_sum_limit = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_LIMIT'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
+    #crd_sum_limit.rename(columns= lambda x : 'AMT_CREDIT_SUM_LIMIT_' + x , inplace=True) 
+    crd_sum_limit.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_sum_limit.columns.tolist()])
     crd_sum_limit = add_SK_ID_CURR_to_crossTabRes(crd_sum_limit)
 
-    crd_sum_overdue = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_OVERDUE'], aggfunc=np.sum, dropna=False)
-    crd_sum_overdue.rename(columns= lambda x : 'AMT_CREDIT_SUM_OVERDUE_' + x , inplace=True) 
+    crd_sum_overdue = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_OVERDUE'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
+    #crd_sum_overdue.rename(columns= lambda x : 'AMT_CREDIT_SUM_OVERDUE_' + x , inplace=True) 
+    crd_sum_overdue.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_sum_overdue.columns.tolist()])
     crd_sum_overdue = add_SK_ID_CURR_to_crossTabRes(crd_sum_overdue)
 
     crd_type = pd.crosstab(index=bureau['SK_ID_CURR'], columns = bureau['CREDIT_TYPE'], dropna=False)
     crd_type = add_SK_ID_CURR_to_crossTabRes(crd_type)
 
-    crd_day_update = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'DAYS_CREDIT_UPDATE_YRS':'mean'})
-    crd_day_annuity = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_ANNUITY':'mean'})
+    crd_day_update = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'DAYS_CREDIT_UPDATE_YRS':['min', 'max', 'mean', 'var']})
+    crd_day_update.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_update.columns.tolist()])
     
+    crd_day_annuity = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_ANNUITY':['min', 'max', 'mean', 'var']})
+    crd_day_annuity.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_annuity.columns.tolist()])
+    
+
     dfs = [crd_active_bureau,
         crd_active_currency,
         crd_days_by_active_status,
@@ -204,7 +222,7 @@ def bureau_features(bureau, bb_aggrigations):
         crd_day_annuity,
         bb_summarize]
     bureau_features  = reduce(lambda left,right: pd.merge(left, right, on='SK_ID_CURR'), dfs)
-    #bureau_features.fillna(0, inplace=True)
+    bureau_features.fillna(0, inplace=True)
     #bureau_features = bureau_features.set_index('SK_ID_CURR')
      
     return bureau_features
@@ -290,34 +308,20 @@ def kfold_lightgbm(df, num_folds, stratified = False, debug= False):
         clf = LGBMClassifier(
             nthread=4,
             n_estimators=10000,
-#==============================================================================
-#             learning_rate=0.02,
-#             num_leaves=34,
-#             colsample_bytree=0.9497036,
-#             subsample=0.8715623,
-#             subsample_freq=1,
-#             max_depth=8,
-#             reg_alpha=0.041545473,
-#             reg_lambda=0.0735294,
-#             min_split_gain=0.0222415,
-#             min_child_weight=39.3259775,
-#             random_state=0,
-#             silent=-1,
-#             verbose=-1,
-#             'colsample_bylevel': 0.417322896138908,
-#==============================================================================
-             colsample_bytree= 0.9051691017946866,
-             gamma= 4.130828170307698e-08,
-             learning_rate= 0.4685157092356401,
-             max_delta_step= 14,
-             max_depth= 48,
-             min_child_weight= 2,
-             #n_estimators= 81,
-             reg_alpha= 0.1166276409797035,
-             reg_lambda= 3.022483203428652e-07,
-             scale_pos_weight= 0.004513468724073575,
-             subsample= 0.06415751635420602 )
-
+            learning_rate=0.02,
+            num_leaves=34,
+            colsample_bytree=0.9497036,
+            subsample=0.8715623,
+            subsample_freq=1,
+            max_depth=5,
+            reg_alpha=0.041545473,
+            reg_lambda=0.0735294,
+            min_split_gain=0.0222415,
+            min_child_weight=39.3259775,
+            random_state=0,
+            silent=-1,
+            verbose=-1)
+            
         clf.fit(train_x, train_y, eval_set=[(train_x, train_y), (valid_x, valid_y)], 
             eval_metric= 'auc', verbose= 100, early_stopping_rounds= 200)
 
@@ -334,7 +338,6 @@ def kfold_lightgbm(df, num_folds, stratified = False, debug= False):
         gc.collect()
 
     print('Full AUC score %.6f' % roc_auc_score(train_df['TARGET'], oof_preds))
-
 
 
 #%%
@@ -354,14 +357,14 @@ if __name__ == '__main__':
     for x in list(bureau_balance_features1.columns.values): aggregations[x] =  ['min', 'max', 'mean', 'var']
     
     bureau_features1 =  bureau_features(bureau, aggregations )
-    bureau_features1 = bureau_features1.set_index('SK_ID_CURR')
+    #bureau_features1 = bureau_features1.set_index('SK_ID_CURR')
         
     del bureau, bureau_balance
     gc.collect()
     
     print('## application_train_test ##')    
-    df = from_lib.application_train_test(num_rows)
-
+    df = from_lib.application_train_test(num_rows, nan_as_category = True)
+    
     print('## previous_applications ##')    
     prev = from_lib.previous_applications(num_rows)
 
@@ -375,9 +378,11 @@ if __name__ == '__main__':
     cc = from_lib.credit_card_balance(num_rows)
     
     print('## Joining All ##')    
+    #pdb.set_trace()
     df = df.join(bureau_features1, how='left', rsuffix="_bureau", on = 'SK_ID_CURR')
-    del bureau_features1; gc.collect()
+    #del bureau_features1; gc.collect()
     
+
     df = df.join(prev, how='left', on = "SK_ID_CURR")
     del prev;gc.collect()
     
@@ -389,57 +394,74 @@ if __name__ == '__main__':
     
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
-    pdb.set_trace()
-    df.to_csv("../output/hcdr_f.csv", index=False)
-    pdb.set_trace()
+    df = df.drop('index', axis = 1)
+    #pdb.set_trace()
+
+    #numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    #continuous_vars = [c for c in df.columns.values if df[c].dtype in numerics]
+    #df[continuous_vars] = df[continuous_vars].fillna(-1)
+    
+
+    #df.to_csv("../output/hcdr_f.csv", index=False)
+    #pdb.set_trace()
    # with open('../output/features.pkl', 'wb') as fp:
    #   pickle.dump(df, fp)
 
-    #kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
+    kfold_lightgbm(df, num_folds= 5, stratified= False, debug= False)
+    
     
     train_df = df[df['TARGET'].notnull()]
     test_df = df[df['TARGET'].isnull()]
+    
+    y = train_df.TARGET.values   
+    train_data = train_df.drop('TARGET', axis=1)
+    
+    X_train, X_test, y_train, y_test = train_test_split(train_data, y, test_size=0.2, random_state=42)
+    DTrain = xgb.DMatrix(X_train.drop('SK_ID_CURR', axis=1), y_train)
+    DTest = xgb.DMatrix(X_test.drop('SK_ID_CURR', axis=1), label=y_test)	
 
     
-    search_spaces1 = {
-        'learning_rate': (0.01, 1.0, 'log-uniform'),
-        'min_child_weight': (0, 10),
-        'max_depth': (0, 50),
-        'max_delta_step': (0, 20),
-        'subsample': (0.01, 1.0, 'uniform'),
-        'colsample_bytree': (0.01, 1.0, 'uniform'),
-        'colsample_bylevel': (0.01, 1.0, 'uniform'),
-        'reg_lambda': (1e-9, 1000, 'log-uniform'),
-        'reg_alpha': (1e-9, 1.0, 'log-uniform'),
-        'gamma': (1e-9, 0.5, 'log-uniform'),
-        'min_child_weight': (0, 5),
-        'n_estimators': (50, 100),
-        'scale_pos_weight': (1e-6, 500, 'log-uniform')
-    }
-
-    search_spaces2 = {
-    'colsample_bylevel': (0.1, 1.0, 'uniform'),
-    'colsample_bytree': (0.1, 1.0, 'uniform'),
-    'gamma': (1e-09, 0.5, 'log-uniform'),
-    'learning_rate': (0.01, 1.0, 'log-uniform'),
-    'max_delta_step': (0, 20),
-    'max_depth': (0, 50),
-    'min_child_weight': (0, 5),
-    'n_estimators': (50, 500),
-    'reg_alpha': (1e-09, 1.0, 'log-uniform'),
-    'reg_lambda': (1e-09, 20, 'log-uniform'),
-    'scale_pos_weight': (0.01, 20, 'log-uniform'),
-
-    'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0]}#     'subsample':(0.01, 1.0, 'uniform')} 
-    
-    search_spaces={
-    'max_depth':  [3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
-    'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0],
-    'colsample_bytree': [0.5,0.6,0.7,0.8],
-    'n_estimators': [1000,2000,3000],
-    'reg_alpha': [0.01, 0.02, 0.03, 0.04]
-    }
-    
+#==============================================================================
+#     search_spaces1 = {
+#         'learning_rate': (0.01, 1.0, 'log-uniform'),
+#         'min_child_weight': (0, 10),
+#         'max_depth': (0, 50),
+#         'max_delta_step': (0, 20),
+#         'subsample': (0.01, 1.0, 'uniform'),
+#         'colsample_bytree': (0.01, 1.0, 'uniform'),
+#         'colsample_bylevel': (0.01, 1.0, 'uniform'),
+#         'reg_lambda': (1e-9, 1000, 'log-uniform'),
+#         'reg_alpha': (1e-9, 1.0, 'log-uniform'),
+#         'gamma': (1e-9, 0.5, 'log-uniform'),
+#         'min_child_weight': (0, 5),
+#         'n_estimators': (50, 100),
+#         'scale_pos_weight': (1e-6, 500, 'log-uniform')
+#     }
+# 
+#     search_spaces2 = {
+#     'colsample_bylevel': (0.1, 1.0, 'uniform'),
+#     'colsample_bytree': (0.1, 1.0, 'uniform'),
+#     'gamma': (1e-09, 0.5, 'log-uniform'),
+#     'learning_rate': (0.01, 1.0, 'log-uniform'),
+#     'max_delta_step': (0, 20),
+#     'max_depth': (0, 50),
+#     'min_child_weight': (0, 5),
+#     'n_estimators': (50, 500),
+#     'reg_alpha': (1e-09, 1.0, 'log-uniform'),
+#     'reg_lambda': (1e-09, 20, 'log-uniform'),
+#     'scale_pos_weight': (0.01, 20, 'log-uniform'),
+# 
+#     'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0]}#     'subsample':(0.01, 1.0, 'uniform')} 
+#     
+#     search_spaces={
+#     'max_depth':  [3,4,5,6,7,8,9], # 5 is good but takes too long in kaggle env
+#     'subsample': [0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+#     'colsample_bytree': [0.5,0.6,0.7,0.8],
+#     'n_estimators': [1000,2000,3000],
+#     'reg_alpha': [0.01, 0.02, 0.03, 0.04]
+#     }
+#     
+#==============================================================================
 
 #==============================================================================
 #     opt = BayesSearchCV(
@@ -547,3 +569,4 @@ if __name__ == '__main__':
         
 #%%    
     
+

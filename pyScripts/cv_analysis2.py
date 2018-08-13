@@ -85,7 +85,7 @@ TN_subset_fromTR1 = data[np.in1d( data.SK_ID_CURR.values, resst_TN )]
 
 params = {
     # Parameters that we are going to tune.
-    'max_depth':4,
+    'max_depth':6,
     'min_child_weight': 1,
     'eta':.01,
     'subsample': 0.8,
@@ -117,6 +117,9 @@ DTest = xgb.DMatrix(test_data.drop('SK_ID_CURR', axis=1), label=y_test)
 
 Dtrain1SubTN = xgb.DMatrix(TN_subset_fromTR1.drop('SK_ID_CURR', axis=1), label=y_train1_tn)
 #xgb.cv(params, DTrain, num_boost_round = 999, early_stopping_rounds=40, verbose_eval=2 )
+
+xgb.cv(params, DTrain, num_boost_round = 2000, early_stopping_rounds=40, verbose_eval=2 )
+
 
 #%%
 

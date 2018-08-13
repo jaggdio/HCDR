@@ -31,7 +31,7 @@ data_train_neg = train_df[train_df.TARGET == 0]
 
 #data_train_pos.isnotnull()
 
-not_null_cols = np.sum(data_train_neg.isnull())
+not_null_cols = np.sum(pd.isnull(data_train_neg))
 not_null_cols = not_null_cols [not_null_cols == 0].index.values
 print(len(not_null_cols))
 
@@ -52,6 +52,12 @@ from scipy.spatial.distance import cdist
 import numpy as np
 #import matplotlib.pyplot as plt
 
+#%%
+
+a = X.applymap(lambda x: np.nan if np.isinf(x) else x)
+not_null_cols = np.sum(pd.isnull(a) )[ np.sum(pd.isnull(a) )  == 0].index.values
+
+X = X[not_null_cols ]
 
 #%%
 
@@ -64,19 +70,20 @@ import numpy as np
 #     kmeanModel.fit(X)
 #     distortions.append(sum(np.min(cdist(X, kmeanModel.cluster_centers_, 'euclidean'), axis=1)) / X.shape[0])
 #     print(k)
+#     
 #==============================================================================
+#%%
     
-    
+import matplotlib.pyplot as plt
+   
 #%%    
 
 # Plot the elbow
-#==============================================================================
-# plt.plot(K, distortions, 'bx-')
-# plt.xlabel('k')
-# plt.ylabel('Distortion')
-# plt.title('The Elbow Method showing the optimal k')
-# plt.show()
-#==============================================================================
+plt.plot(K, distortions, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Distortion')
+plt.title('The Elbow Method showing the optimal k')
+plt.show()
 
 
 #%%
@@ -85,7 +92,7 @@ kmeans = KMeans(n_clusters=10)
 kmeans.fit(X)
 y_kmeans = kmeans.predict(X)
 
-pdb.set_trace()
+#pdb.set_trace()
 
 #%%
 data_train_neg['y_kmeans'] = y_kmeans
