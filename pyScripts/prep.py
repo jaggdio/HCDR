@@ -381,8 +381,13 @@ if __name__ == '__main__':
     cc = from_lib.credit_card_balance(num_rows)
     
     print('## Joining All ##')    
-    #pdb.set_trace()
-    df = df.join(bureau_features1, how='left', rsuffix="_bureau", on = 'SK_ID_CURR')
+    df = df.set_index('SK_ID_CURR')
+
+    bu_SK_ID_CURR = bureau_features1.SK_ID_CURR.values
+    bureau_features1['bu_SK_ID_CURR'] = bu_SK_ID_CURR
+    bureau_features1 = bureau_features1.set_index('SK_ID_CURR')
+    
+    df = df.join(bureau_features1, how='left', rsuffix="_bureau") #on = 'SK_ID_CURR'
     #del bureau_features1; gc.collect()
     
 
@@ -398,15 +403,16 @@ if __name__ == '__main__':
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
     df = df.drop('index', axis = 1)
-    pdb.set_trace()
+    
+    #pdb.set_trace()
 
     #numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     #continuous_vars = [c for c in df.columns.values if df[c].dtype in numerics]
     #df[continuous_vars] = df[continuous_vars].fillna(-1)
     
 
-    #df.to_csv("../output/hcdr_f.csv", index=False)
-    #pdb.set_trace()
+    df.to_csv("../output/hcdr_f.csv", index=True) # index is SK_ID_CURR
+    pdb.set_trace()
    # with open('../output/features.pkl', 'wb') as fp:
    #   pickle.dump(df, fp)
 
