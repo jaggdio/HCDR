@@ -161,11 +161,11 @@ def bureau_features(bureau, bb_aggrigations):
     
     # 
     crd_day_overdue = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'CREDIT_DAY_OVERDUE_YRS':['min', 'max', 'mean', 'var']})
-    crd_day_overdue.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_overdue.columns.tolist()])
+    crd_day_overdue.columns = pd.Index([ e[0] if e[0] == 'SK_ID_CURR' else 'bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_overdue.columns.tolist()])
 
     # NaN means no overdue
     crd_max_amt_overdue  = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_CREDIT_MAX_OVERDUE':['min', 'max', 'mean', 'var']})
-    crd_max_amt_overdue.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_max_amt_overdue.columns.tolist()])
+    crd_max_amt_overdue.columns = pd.Index([ e[0] if e[0] == 'SK_ID_CURR' else 'bureau_' + e[0] + "_" + e[1].upper() for e in crd_max_amt_overdue.columns.tolist()])
 
     # 
     crd_cnt_prolong = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'CNT_CREDIT_PROLONG':'sum'})
@@ -173,8 +173,11 @@ def bureau_features(bureau, bb_aggrigations):
     # current credit ammount
     # [np.mean, np.median, min, max, np.std]
     crd_amt_sum = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
-    crd_amt_sum.rename(columns= lambda x : 'AMT_CREDIT_SUM_' + x, inplace=True) 
-    crd_amt_sum['SK_ID_CURR'] = crd_amt_sum.index.values
+    #crd_amt_sum.rename(columns= lambda x : 'AMT_CREDIT_SUM_' + x, inplace=True) 
+    #crd_amt_sum['SK_ID_CURR'] = crd_amt_sum.index.values
+    crd_amt_sum.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_amt_sum.columns.tolist()])
+    crd_amt_sum = add_SK_ID_CURR_to_crossTabRes(crd_amt_sum)
+
     
     # current debt on Credit Bureau Credit
     crd_amt_debt = pd.crosstab(index=bureau['SK_ID_CURR'], columns=bureau['CREDIT_ACTIVE'], values=bureau['AMT_CREDIT_SUM_DEBT'], aggfunc=[np.mean, np.median, min, max, np.var], dropna=False)
@@ -197,10 +200,10 @@ def bureau_features(bureau, bb_aggrigations):
     crd_type = add_SK_ID_CURR_to_crossTabRes(crd_type)
 
     crd_day_update = bureau_years.groupby(['SK_ID_CURR'], as_index=False).agg({'DAYS_CREDIT_UPDATE_YRS':['min', 'max', 'mean', 'var']})
-    crd_day_update.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_update.columns.tolist()])
+    crd_day_update.columns = pd.Index([ e[0] if e[0] == 'SK_ID_CURR' else 'bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_update.columns.tolist()])
     
     crd_day_annuity = bureau.groupby(['SK_ID_CURR'], as_index=False).agg({'AMT_ANNUITY':['min', 'max', 'mean', 'var']})
-    crd_day_annuity.columns = pd.Index(['bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_annuity.columns.tolist()])
+    crd_day_annuity.columns = pd.Index([ e[0] if e[0] == 'SK_ID_CURR' else 'bureau_' + e[0] + "_" + e[1].upper() for e in crd_day_annuity.columns.tolist()])
     
 
     dfs = [crd_active_bureau,
@@ -395,7 +398,7 @@ if __name__ == '__main__':
     df = df.join(cc, how='left', on="SK_ID_CURR")
     del cc; gc.collect()
     df = df.drop('index', axis = 1)
-    #pdb.set_trace()
+    pdb.set_trace()
 
     #numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     #continuous_vars = [c for c in df.columns.values if df[c].dtype in numerics]
